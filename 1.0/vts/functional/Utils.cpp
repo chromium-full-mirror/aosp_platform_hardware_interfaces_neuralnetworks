@@ -21,11 +21,14 @@
 
 #include <android-base/logging.h>
 #include <android/hardware/neuralnetworks/1.0/types.h>
-#include <android/hardware_buffer.h>
 #include <android/hidl/allocator/1.0/IAllocator.h>
 #include <android/hidl/memory/1.0/IMemory.h>
 #include <hidlmemory/mapping.h>
+// TODO(b/157388904): Hardware buffers not implemented on ChromeOS.
+#ifndef NNAPI_CHROMEOS
+#include <android/hardware_buffer.h>
 #include <vndk/hardware_buffer.h>
+#endif
 
 #include <gtest/gtest.h>
 #include <algorithm>
@@ -61,6 +64,8 @@ void TestAshmem::initialize(uint32_t size) {
     mIsValid = true;
 }
 
+// TODO(b/157388904): Hardware buffers not implemented on ChromeOS.
+#ifndef NNAPI_CHROMEOS
 std::unique_ptr<TestBlobAHWB> TestBlobAHWB::create(uint32_t size) {
     auto ahwb = std::make_unique<TestBlobAHWB>(size);
     return ahwb->mIsValid ? std::move(ahwb) : nullptr;
@@ -98,6 +103,7 @@ TestBlobAHWB::~TestBlobAHWB() {
         AHardwareBuffer_release(mAhwb);
     }
 }
+#endif
 
 Request ExecutionContext::createRequest(const TestModel& testModel, MemoryType memoryType) {
     CHECK(memoryType == MemoryType::ASHMEM || memoryType == MemoryType::BLOB_AHWB);
@@ -145,8 +151,11 @@ Request ExecutionContext::createRequest(const TestModel& testModel, MemoryType m
         mInputMemory = TestAshmem::create(inputSize);
         mOutputMemory = TestAshmem::create(outputSize);
     } else {
+// TODO(b/157388904): Hardware buffers not implemented on ChromeOS.
+#ifndef NNAPI_CHROMEOS
         mInputMemory = TestBlobAHWB::create(inputSize);
         mOutputMemory = TestBlobAHWB::create(outputSize);
+#endif
     }
     EXPECT_NE(mInputMemory, nullptr);
     EXPECT_NE(mOutputMemory, nullptr);

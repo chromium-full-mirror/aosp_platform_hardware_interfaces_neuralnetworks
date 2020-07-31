@@ -231,7 +231,7 @@ class CompilationCachingTestBase : public testing::Test {
 
         // Create cache directory. The cache directory and a temporary cache file is always created
         // to test the behavior of prepareModelFromCache_1_3, even when caching is not supported.
-        char cacheDirTemp[] = "/data/local/tmp/TestCompilationCachingXXXXXX";
+        char cacheDirTemp[] = "/tmp/TestCompilationCachingXXXXXX";
         char* cacheDir = mkdtemp(cacheDirTemp);
         ASSERT_NE(cacheDir, nullptr);
         mCacheDir = cacheDir;

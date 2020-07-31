@@ -19,7 +19,10 @@
 
 #include <android-base/logging.h>
 #include <android/hardware/neuralnetworks/1.0/types.h>
+// TODO(b/157388904): Hardware buffers not implemented on ChromeOS.
+#ifndef NNAPI_CHROMEOS
 #include <android/hardware_buffer.h>
+#endif
 #include <android/hidl/memory/1.0/IMemory.h>
 #include <gtest/gtest.h>
 #include <algorithm>
@@ -28,6 +31,9 @@
 #include <utility>
 #include <vector>
 #include "TestHarness.h"
+
+//TODO(jmpollock) Need to uprev gtest to get the correct implemenation of this.
+#define GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(T)
 
 namespace android::hardware::neuralnetworks {
 
@@ -61,6 +67,8 @@ class TestAshmem : public TestMemoryBase {
     sp<hidl::memory::V1_0::IMemory> mMappedMemory;
 };
 
+// TODO(b/157388904): Hardware buffers not implemented on ChromeOS.
+#ifndef NNAPI_CHROMEOS
 class TestBlobAHWB : public TestMemoryBase {
   public:
     static std::unique_ptr<TestBlobAHWB> create(uint32_t size);
@@ -75,6 +83,7 @@ class TestBlobAHWB : public TestMemoryBase {
     void initialize(uint32_t size);
     AHardwareBuffer* mAhwb = nullptr;
 };
+#endif
 
 enum class MemoryType { ASHMEM, BLOB_AHWB, DEVICE };
 

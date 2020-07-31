@@ -22,7 +22,9 @@
 #include "TestHarness.h"
 
 #include <android-base/logging.h>
+#ifndef NNAPI_CHROMEOS
 #include <hidl/ServiceManagement.h>
+#endif
 #include <string>
 #include <utility>
 
@@ -90,8 +92,11 @@ static NamedDevice makeNamedDevice(const std::string& name) {
 static std::vector<NamedDevice> getNamedDevicesImpl() {
     // Retrieves the name of all service instances that implement IDevice,
     // including any Lazy HAL instances.
+#ifndef NNAPI_CHROMEOS
     const std::vector<std::string> names = hardware::getAllHalInstanceNames(IDevice::descriptor);
-
+#else
+    const std::vector<std::string> names = {"cros-default"};
+#endif
     // Get a handle to each device and pair it with its name.
     std::vector<NamedDevice> namedDevices;
     namedDevices.reserve(names.size());

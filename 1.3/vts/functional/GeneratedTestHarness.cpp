@@ -35,7 +35,9 @@
 #include <android/hardware/neuralnetworks/1.3/types.h>
 #include <android/hidl/allocator/1.0/IAllocator.h>
 #include <android/hidl/memory/1.0/IMemory.h>
+#ifndef NNAPI_CHROMEOS
 #include <android/sync.h>
+#endif
 #include <gtest/gtest.h>
 #include <hidlmemory/mapping.h>
 
@@ -269,8 +271,8 @@ void copyTestBuffers(const std::vector<const TestBuffer*>& buffers, uint8_t* out
 void waitForSyncFence(int syncFd) {
     constexpr int kInfiniteTimeout = -1;
     ASSERT_GT(syncFd, 0);
-    int r = sync_wait(syncFd, kInfiniteTimeout);
-    ASSERT_GE(r, 0);
+    auto r = nn::syncWait(syncFd, kInfiniteTimeout);
+    ASSERT_GE(r, nn::FenceState::SIGNALED);
 }
 
 Model createModel(const TestModel& testModel) {
@@ -439,8 +441,11 @@ std::optional<Request> ExecutionContextV1_3::createRequest(const TestModel& test
     // Memory pools.
     hidl_vec<Request::MemoryPool> pools(kDeviceMemoryBeginIndex + mBuffers.size());
     if (memoryType == MemoryType::BLOB_AHWB) {
+// TODO(b/157388904): Hardware buffers not implemented on ChromeOS.
+#ifndef NNAPI_CHROMEOS
         mInputMemory = TestBlobAHWB::create(std::max<size_t>(inputSize, 1));
         mOutputMemory = TestBlobAHWB::create(std::max<size_t>(outputSize, 1));
+#endif
     } else {
         mInputMemory = TestAshmem::create(std::max<size_t>(inputSize, 1));
         mOutputMemory = TestAshmem::create(std::max<size_t>(outputSize, 1));
@@ -809,7 +814,8 @@ void EvaluatePreparedModel(const sp<IDevice>& device, const sp<IPreparedModel>& 
             outputTypesList = {OutputType::FULLY_SPECIFIED};
             measureTimingList = {MeasureTiming::NO};
             executorList = {Executor::ASYNC, Executor::SYNC, Executor::FENCED};
-            memoryTypeList = {MemoryType::BLOB_AHWB, MemoryType::DEVICE};
+            // TODO(b/157388904): Hardware buffers not implemented on ChromeOS.
+            memoryTypeList = {/* MemoryType::BLOB_AHWB, */ MemoryType::DEVICE};
         } break;
         case TestKind::FENCED_COMPUTE: {
             outputTypesList = {OutputType::FULLY_SPECIFIED};
