@@ -12,8 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-///////////////////////////////////////////////////////////////////////////////
+ *////////////////////////////////////////////////////////////////////////////////
 // THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -34,11 +33,11 @@
 package android.hardware.neuralnetworks;
 @VintfStability
 parcelable Operand {
-  android.hardware.neuralnetworks.OperandType type = android.hardware.neuralnetworks.OperandType.FLOAT32;
+  android.hardware.neuralnetworks.OperandType type;
   int[] dimensions;
   float scale;
   int zeroPoint;
-  android.hardware.neuralnetworks.OperandLifeTime lifetime = android.hardware.neuralnetworks.OperandLifeTime.TEMPORARY_VARIABLE;
+  android.hardware.neuralnetworks.OperandLifeTime lifetime;
   android.hardware.neuralnetworks.DataLocation location;
   @nullable android.hardware.neuralnetworks.OperandExtraParams extraParams;
 }

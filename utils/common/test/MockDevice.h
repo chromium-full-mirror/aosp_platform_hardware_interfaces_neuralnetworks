@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_DEVICE_H
-#define ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_DEVICE_H
+#ifndef ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_DEVICE
+#define ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_DEVICE
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -29,6 +29,7 @@ class MockDevice final : public IDevice {
     MOCK_METHOD(const std::string&, getVersionString, (), (const, override));
     MOCK_METHOD(Version, getFeatureLevel, (), (const, override));
     MOCK_METHOD(DeviceType, getType, (), (const, override));
+    MOCK_METHOD(bool, isUpdatable, (), (const, override));
     MOCK_METHOD(const std::vector<Extension>&, getSupportedExtensions, (), (const, override));
     MOCK_METHOD(const Capabilities&, getCapabilities, (), (const, override));
     MOCK_METHOD((std::pair<uint32_t, uint32_t>), getNumberOfCacheFilesNeeded, (),
@@ -54,4 +55,4 @@ class MockDevice final : public IDevice {
 
 }  // namespace android::nn
 
-#endif  // ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_DEVICE_H
+#endif  // ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_DEVICE

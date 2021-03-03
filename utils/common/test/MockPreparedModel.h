@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_PREPARED_MODEL_H
-#define ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_PREPARED_MODEL_H
+#ifndef ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_PREPARED_MODEL
+#define ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_PREPARED_MODEL
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -35,14 +35,10 @@ class MockPreparedModel final : public IPreparedModel {
                  const OptionalDuration& loopTimeoutDuration,
                  const OptionalDuration& timeoutDurationAfterFence),
                 (const, override));
-    MOCK_METHOD((GeneralResult<SharedExecution>), createReusableExecution,
-                (const nn::Request& request, nn::MeasureTiming measure,
-                 const nn::OptionalDuration& loopTimeoutDuration),
-                (const, override));
     MOCK_METHOD(GeneralResult<SharedBurst>, configureExecutionBurst, (), (const, override));
     MOCK_METHOD(std::any, getUnderlyingResource, (), (const, override));
 };
 
 }  // namespace android::nn
 
-#endif  // ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_PREPARED_MODEL_H
+#endif  // ANDROID_HARDWARE_INTERFACES_NEURALNETWORKS_UTILS_COMMON_TEST_MOCK_PREPARED_MODEL

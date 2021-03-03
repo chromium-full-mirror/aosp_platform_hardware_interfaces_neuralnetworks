@@ -12,8 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-///////////////////////////////////////////////////////////////////////////////
+ *////////////////////////////////////////////////////////////////////////////////
 // THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -34,7 +33,7 @@
 package android.hardware.neuralnetworks;
 @VintfStability
 parcelable Operation {
-  android.hardware.neuralnetworks.OperationType type = android.hardware.neuralnetworks.OperationType.ADD;
+  android.hardware.neuralnetworks.OperationType type;
   int[] inputs;
   int[] outputs;
 }

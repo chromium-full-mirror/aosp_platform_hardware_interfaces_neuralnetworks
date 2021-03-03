@@ -12,8 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-///////////////////////////////////////////////////////////////////////////////
+ *////////////////////////////////////////////////////////////////////////////////
 // THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -41,8 +40,8 @@ interface IDevice {
   boolean[] getSupportedOperations(in android.hardware.neuralnetworks.Model model);
   android.hardware.neuralnetworks.DeviceType getType();
   String getVersionString();
-  void prepareModel(in android.hardware.neuralnetworks.Model model, in android.hardware.neuralnetworks.ExecutionPreference preference, in android.hardware.neuralnetworks.Priority priority, in long deadlineNs, in ParcelFileDescriptor[] modelCache, in ParcelFileDescriptor[] dataCache, in byte[] token, in android.hardware.neuralnetworks.IPreparedModelCallback callback);
-  void prepareModelFromCache(in long deadlineNs, in ParcelFileDescriptor[] modelCache, in ParcelFileDescriptor[] dataCache, in byte[] token, in android.hardware.neuralnetworks.IPreparedModelCallback callback);
+  void prepareModel(in android.hardware.neuralnetworks.Model model, in android.hardware.neuralnetworks.ExecutionPreference preference, in android.hardware.neuralnetworks.Priority priority, in long deadline, in ParcelFileDescriptor[] modelCache, in ParcelFileDescriptor[] dataCache, in byte[] token, in android.hardware.neuralnetworks.IPreparedModelCallback callback);
+  void prepareModelFromCache(in long deadline, in ParcelFileDescriptor[] modelCache, in ParcelFileDescriptor[] dataCache, in byte[] token, in android.hardware.neuralnetworks.IPreparedModelCallback callback);
   const int BYTE_SIZE_OF_CACHE_TOKEN = 32;
   const int MAX_NUMBER_OF_CACHE_FILES = 32;
   const int EXTENSION_TYPE_HIGH_BITS_PREFIX = 15;

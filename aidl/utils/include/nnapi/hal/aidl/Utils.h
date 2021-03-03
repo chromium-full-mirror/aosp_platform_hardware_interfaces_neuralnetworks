@@ -21,10 +21,8 @@
 
 #include <android-base/logging.h>
 #include <nnapi/Result.h>
-#include <nnapi/TypeUtils.h>
 #include <nnapi/Types.h>
 #include <nnapi/Validation.h>
-#include <nnapi/hal/HandleError.h>
 
 namespace aidl::android::hardware::neuralnetworks::utils {
 
@@ -49,32 +47,10 @@ bool valid(const Type& halObject) {
     return result.has_value();
 }
 
-template <typename Type>
-nn::GeneralResult<void> compliantVersion(const Type& canonical) {
-    const auto version = NN_TRY(::android::hardware::neuralnetworks::utils::makeGeneralFailure(
-            nn::validate(canonical)));
-    if (version > kVersion) {
-        return NN_ERROR() << "Insufficient version: " << version << " vs required " << kVersion;
-    }
-    return {};
-}
-
-template <typename Type>
-auto convertFromNonCanonical(const Type& nonCanonicalObject)
-        -> decltype(convert(nn::convert(nonCanonicalObject).value())) {
-    return convert(NN_TRY(nn::convert(nonCanonicalObject)));
-}
-
 nn::GeneralResult<Memory> clone(const Memory& memory);
 nn::GeneralResult<Request> clone(const Request& request);
 nn::GeneralResult<RequestMemoryPool> clone(const RequestMemoryPool& requestPool);
 nn::GeneralResult<Model> clone(const Model& model);
-
-nn::GeneralResult<void> handleTransportError(const ndk::ScopedAStatus& ret);
-
-#define HANDLE_ASTATUS(ret)                                            \
-    for (const auto status = handleTransportError(ret); !status.ok();) \
-    return NN_ERROR(status.error().code) << status.error().message << ": "
 
 }  // namespace aidl::android::hardware::neuralnetworks::utils
 

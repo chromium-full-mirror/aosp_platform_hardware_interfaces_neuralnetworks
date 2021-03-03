@@ -12,8 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-///////////////////////////////////////////////////////////////////////////////
+ *////////////////////////////////////////////////////////////////////////////////
 // THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,8 +32,8 @@
 
 package android.hardware.neuralnetworks;
 @VintfStability
-union Memory {
-  android.hardware.common.Ashmem ashmem;
-  android.hardware.common.MappableFile mappableFile;
-  android.hardware.graphics.common.HardwareBuffer hardwareBuffer;
+parcelable Memory {
+  android.hardware.common.NativeHandle handle;
+  long size;
+  String name;
 }

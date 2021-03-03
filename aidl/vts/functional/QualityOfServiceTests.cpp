@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <android-base/chrono_utils.h>
 #include <android/binder_enums.h>
 #include <android/binder_interface_utils.h>
 #include <android/binder_status.h>
+
 #include <nnapi/hal/aidl/Conversions.h>
 
 #include "Callbacks.h"
@@ -51,26 +51,22 @@ constexpr auto kShortDuration = std::chrono::milliseconds{5};
 using Results = std::tuple<ErrorStatus, std::vector<OutputShape>, Timing>;
 using MaybeResults = std::optional<Results>;
 
-using ExecutionFunction =
-        std::function<MaybeResults(const std::shared_ptr<IPreparedModel>& preparedModel,
-                                   const Request& request, int64_t deadlineNs)>;
-
 static int64_t makeDeadline(DeadlineBoundType deadlineBoundType) {
     const auto getNanosecondsSinceEpoch = [](const auto& time) -> int64_t {
         const auto timeSinceEpoch = time.time_since_epoch();
         return std::chrono::duration_cast<std::chrono::nanoseconds>(timeSinceEpoch).count();
     };
 
-    ::android::base::boot_clock::time_point timePoint;
+    std::chrono::steady_clock::time_point timePoint;
     switch (deadlineBoundType) {
         case DeadlineBoundType::NOW:
-            timePoint = ::android::base::boot_clock::now();
+            timePoint = std::chrono::steady_clock::now();
             break;
         case DeadlineBoundType::UNLIMITED:
-            timePoint = ::android::base::boot_clock::time_point::max();
+            timePoint = std::chrono::steady_clock::time_point::max();
             break;
         case DeadlineBoundType::SHORT:
-            timePoint = ::android::base::boot_clock::now() + kShortDuration;
+            timePoint = std::chrono::steady_clock::now() + kShortDuration;
             break;
     }
 
@@ -79,9 +75,9 @@ static int64_t makeDeadline(DeadlineBoundType deadlineBoundType) {
 
 void runPrepareModelTest(const std::shared_ptr<IDevice>& device, const Model& model,
                          Priority priority, std::optional<DeadlineBoundType> deadlineBound) {
-    int64_t deadlineNs = kNoDeadline;
+    int64_t deadline = kNoDeadline;
     if (deadlineBound.has_value()) {
-        deadlineNs = makeDeadline(deadlineBound.value());
+        deadline = makeDeadline(deadlineBound.value());
     }
 
     // see if service can handle model
@@ -96,8 +92,8 @@ void runPrepareModelTest(const std::shared_ptr<IDevice>& device, const Model& mo
     const std::shared_ptr<PreparedModelCallback> preparedModelCallback =
             ndk::SharedRefBase::make<PreparedModelCallback>();
     const auto prepareLaunchStatus =
-            device->prepareModel(model, ExecutionPreference::FAST_SINGLE_ANSWER, priority,
-                                 deadlineNs, {}, {}, kEmptyCacheToken, preparedModelCallback);
+            device->prepareModel(model, ExecutionPreference::FAST_SINGLE_ANSWER, priority, deadline,
+                                 {}, {}, kEmptyCacheToken, preparedModelCallback);
     ASSERT_TRUE(prepareLaunchStatus.isOk())
             << "prepareLaunchStatus: " << prepareLaunchStatus.getDescription();
 
@@ -156,52 +152,14 @@ void runPrepareModelTests(const std::shared_ptr<IDevice>& device, const Model& m
 }
 
 static MaybeResults executeSynchronously(const std::shared_ptr<IPreparedModel>& preparedModel,
-                                         const Request& request, int64_t deadlineNs) {
+                                         const Request& request, int64_t deadline) {
     SCOPED_TRACE("synchronous");
     const bool measure = false;
 
     // run execution
     ExecutionResult executionResult;
-    const auto ret = preparedModel->executeSynchronously(request, measure, deadlineNs,
+    const auto ret = preparedModel->executeSynchronously(request, measure, deadline,
                                                          kOmittedTimeoutDuration, &executionResult);
-    EXPECT_TRUE(ret.isOk() || ret.getExceptionCode() == EX_SERVICE_SPECIFIC)
-            << ret.getDescription();
-    if (!ret.isOk()) {
-        if (ret.getExceptionCode() != EX_SERVICE_SPECIFIC) {
-            return std::nullopt;
-        }
-        return MaybeResults(
-                {static_cast<ErrorStatus>(ret.getServiceSpecificError()), {}, kNoTiming});
-    }
-
-    // return results
-    return MaybeResults({executionResult.outputSufficientSize
-                                 ? ErrorStatus::NONE
-                                 : ErrorStatus::OUTPUT_INSUFFICIENT_SIZE,
-                         std::move(executionResult.outputShapes), executionResult.timing});
-}
-
-static MaybeResults executeBurst(const std::shared_ptr<IPreparedModel>& preparedModel,
-                                 const Request& request, int64_t deadlineNs) {
-    SCOPED_TRACE("burst");
-    const bool measure = false;
-
-    // create burst
-    std::shared_ptr<IBurst> burst;
-    auto ret = preparedModel->configureExecutionBurst(&burst);
-    EXPECT_TRUE(ret.isOk()) << ret.getDescription();
-    EXPECT_NE(nullptr, burst.get());
-    if (!ret.isOk() || burst.get() == nullptr) {
-        return std::nullopt;
-    }
-
-    // use -1 for all memory identifier tokens
-    const std::vector<int64_t> slots(request.pools.size(), -1);
-
-    // run execution
-    ExecutionResult executionResult;
-    ret = burst->executeSynchronously(request, slots, measure, deadlineNs, kOmittedTimeoutDuration,
-                                      &executionResult);
     EXPECT_TRUE(ret.isOk() || ret.getExceptionCode() == EX_SERVICE_SPECIFIC)
             << ret.getDescription();
     if (!ret.isOk()) {
@@ -221,13 +179,11 @@ static MaybeResults executeBurst(const std::shared_ptr<IPreparedModel>& prepared
 
 void runExecutionTest(const std::shared_ptr<IPreparedModel>& preparedModel,
                       const TestModel& testModel, const Request& request,
-                      const ExecutionContext& context, bool synchronous,
-                      DeadlineBoundType deadlineBound) {
-    const ExecutionFunction execute = synchronous ? executeSynchronously : executeBurst;
-    const auto deadlineNs = makeDeadline(deadlineBound);
+                      const ExecutionContext& context, DeadlineBoundType deadlineBound) {
+    const auto deadline = makeDeadline(deadlineBound);
 
     // Perform execution and unpack results.
-    const auto results = execute(preparedModel, request, deadlineNs);
+    const auto results = executeSynchronously(preparedModel, request, deadline);
     if (!results.has_value()) return;
     const auto& [status, outputShapes, timing] = results.value();
 
@@ -279,11 +235,8 @@ void runExecutionTest(const std::shared_ptr<IPreparedModel>& preparedModel,
 void runExecutionTests(const std::shared_ptr<IPreparedModel>& preparedModel,
                        const TestModel& testModel, const Request& request,
                        const ExecutionContext& context) {
-    for (bool synchronous : {false, true}) {
-        for (auto deadlineBound : deadlineBounds) {
-            runExecutionTest(preparedModel, testModel, request, context, synchronous,
-                             deadlineBound);
-        }
+    for (auto deadlineBound : deadlineBounds) {
+        runExecutionTest(preparedModel, testModel, request, context, deadlineBound);
     }
 }
 
