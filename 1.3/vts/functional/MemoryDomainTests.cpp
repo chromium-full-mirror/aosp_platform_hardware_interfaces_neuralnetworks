@@ -606,6 +606,7 @@ std::string printMemoryDomainAllocateTest(
     return gtestCompliantName(getName(namedDevice) + "_" + type);
 }
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(MemoryDomainAllocateTest);
 INSTANTIATE_TEST_SUITE_P(TestMemoryDomain, MemoryDomainAllocateTest,
                          testing::Combine(kNamedDeviceChoices, kTestOperandTypeChoices),
                          printMemoryDomainAllocateTest);
@@ -830,6 +831,7 @@ std::string printMemoryDomainCopyTest(
     return gtestCompliantName(getName(namedDevice) + "_" + type);
 }
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(MemoryDomainCopyTest);
 INSTANTIATE_TEST_SUITE_P(TestMemoryDomain, MemoryDomainCopyTest,
                          testing::Combine(kNamedDeviceChoices, kTestOperandTypeChoices),
                          printMemoryDomainCopyTest);
@@ -1196,6 +1198,7 @@ std::string printMemoryDomainExecutionTest(
     return gtestCompliantName(getName(namedDevice) + "_" + type + "_" + executorStr);
 }
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(MemoryDomainExecutionTest);
 INSTANTIATE_TEST_SUITE_P(TestMemoryDomain, MemoryDomainExecutionTest,
                          testing::Combine(kNamedDeviceChoices, kTestOperandTypeChoices,
                                           kExecutorChoices),
