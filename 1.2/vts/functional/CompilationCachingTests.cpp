@@ -1198,7 +1198,10 @@ TEST_P(CompilationCachingTest, ReplaceSecuritySensitiveCache) {
     }
 }
 
-static const auto kNamedDeviceChoices = testing::ValuesIn(getNamedDevices());
+static ::testing::internal::ParamGenerator<NamedDevice> namedDeviceChoices() {
+  return testing::ValuesIn(getNamedDevices());
+}
+
 static const auto kOperandTypeChoices =
         testing::Values(OperandType::TENSOR_FLOAT32, OperandType::TENSOR_QUANT8_ASYMM);
 
@@ -1210,8 +1213,10 @@ std::string printCompilationCachingTest(
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(CompilationCachingTest);
-INSTANTIATE_TEST_SUITE_P(TestCompilationCaching, CompilationCachingTest,
-                         testing::Combine(kNamedDeviceChoices, kOperandTypeChoices),
+INSTANTIATE_TEST_SUITE_P(TestCompilationCaching,
+                         CompilationCachingTest,
+                         testing::Combine(namedDeviceChoices(),
+                                          kOperandTypeChoices),
                          printCompilationCachingTest);
 
 using CompilationCachingSecurityTestParam = std::tuple<NamedDevice, OperandType, uint32_t>;
@@ -1367,8 +1372,10 @@ std::string printCompilationCachingSecurityTest(
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(CompilationCachingSecurityTest);
-INSTANTIATE_TEST_SUITE_P(TestCompilationCaching, CompilationCachingSecurityTest,
-                         testing::Combine(kNamedDeviceChoices, kOperandTypeChoices,
+INSTANTIATE_TEST_SUITE_P(TestCompilationCaching,
+                         CompilationCachingSecurityTest,
+                         testing::Combine(namedDeviceChoices(),
+                                          kOperandTypeChoices,
                                           testing::Range(0U, 10U)),
                          printCompilationCachingSecurityTest);
 

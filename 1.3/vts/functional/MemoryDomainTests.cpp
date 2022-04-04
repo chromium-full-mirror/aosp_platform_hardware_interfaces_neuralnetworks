@@ -41,7 +41,9 @@ using V1_2::Timing;
 
 namespace {
 
-const auto kNamedDeviceChoices = testing::ValuesIn(getNamedDevices());
+static ::testing::internal::ParamGenerator<NamedDevice> namedDeviceChoices() {
+  return testing::ValuesIn(getNamedDevices());
+}
 
 // A 1.3 driver is likely to support at least one of the following operand types.
 const std::vector<TestOperandType> kTestOperandTypeChoicesVector = {
@@ -607,8 +609,10 @@ std::string printMemoryDomainAllocateTest(
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(MemoryDomainAllocateTest);
-INSTANTIATE_TEST_SUITE_P(TestMemoryDomain, MemoryDomainAllocateTest,
-                         testing::Combine(kNamedDeviceChoices, kTestOperandTypeChoices),
+INSTANTIATE_TEST_SUITE_P(TestMemoryDomain,
+                         MemoryDomainAllocateTest,
+                         testing::Combine(namedDeviceChoices(),
+                                          kTestOperandTypeChoices),
                          printMemoryDomainAllocateTest);
 
 class MemoryDomainCopyTestBase : public MemoryDomainTestBase {
@@ -832,8 +836,10 @@ std::string printMemoryDomainCopyTest(
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(MemoryDomainCopyTest);
-INSTANTIATE_TEST_SUITE_P(TestMemoryDomain, MemoryDomainCopyTest,
-                         testing::Combine(kNamedDeviceChoices, kTestOperandTypeChoices),
+INSTANTIATE_TEST_SUITE_P(TestMemoryDomain,
+                         MemoryDomainCopyTest,
+                         testing::Combine(namedDeviceChoices(),
+                                          kTestOperandTypeChoices),
                          printMemoryDomainCopyTest);
 
 using MemoryDomainExecutionTestParam = std::tuple<NamedDevice, TestOperandType, Executor>;
@@ -1199,8 +1205,10 @@ std::string printMemoryDomainExecutionTest(
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(MemoryDomainExecutionTest);
-INSTANTIATE_TEST_SUITE_P(TestMemoryDomain, MemoryDomainExecutionTest,
-                         testing::Combine(kNamedDeviceChoices, kTestOperandTypeChoices,
+INSTANTIATE_TEST_SUITE_P(TestMemoryDomain,
+                         MemoryDomainExecutionTest,
+                         testing::Combine(namedDeviceChoices(),
+                                          kTestOperandTypeChoices,
                                           kExecutorChoices),
                          printMemoryDomainExecutionTest);
 
