@@ -18,6 +18,7 @@
 
 #include <aidl/android/hardware/common/Ashmem.h>
 #include <aidl/android/hardware/common/MappableFile.h>
+#include <aidl/android/hardware/common/NativeHandle.h>
 #include <aidl/android/hardware/graphics/common/HardwareBuffer.h>
 #include <android/binder_auto_utils.h>
 #include <android/binder_status.h>
@@ -50,12 +51,14 @@ nn::GeneralResult<ndk::ScopedFileDescriptor> clone(const ndk::ScopedFileDescript
     return ndk::ScopedFileDescriptor(duplicatedFd.release());
 }
 
+#if !defined(NNAPI_CHROMEOS)
 nn::GeneralResult<common::NativeHandle> clone(const common::NativeHandle& handle) {
     return common::NativeHandle{
             .fds = NN_TRY(cloneVec(handle.fds)),
             .ints = handle.ints,
     };
 }
+#endif
 
 }  // namespace
 
@@ -80,12 +83,18 @@ nn::GeneralResult<Memory> clone(const Memory& memory) {
             return Memory::make<Memory::Tag::mappableFile>(std::move(handle));
         }
         case Memory::Tag::hardwareBuffer: {
+#if !defined(NNAPI_CHROMEOS)
             const auto& hardwareBuffer = memory.get<Memory::Tag::hardwareBuffer>();
             auto handle = graphics::common::HardwareBuffer{
                     .description = hardwareBuffer.description,
                     .handle = NN_TRY(clone(hardwareBuffer.handle)),
             };
             return Memory::make<Memory::Tag::hardwareBuffer>(std::move(handle));
+#else
+            return (NN_ERROR() << "Memory::Tag::hardwareBuffer not supported")
+                    .
+                    operator nn::GeneralResult<Memory>();
+#endif
         }
     }
     return (NN_ERROR() << "Unrecognized Memory::Tag: " << underlyingType(memory.getTag()))

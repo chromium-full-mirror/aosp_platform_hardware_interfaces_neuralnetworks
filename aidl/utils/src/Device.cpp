@@ -192,8 +192,10 @@ std::pair<uint32_t, uint32_t> Device::getNumberOfCacheFilesNeeded() const {
 }
 
 nn::GeneralResult<void> Device::wait() const {
+#if !defined(NNAPI_CHROMEOS)
     const auto ret = ndk::ScopedAStatus::fromStatus(AIBinder_ping(kDevice->asBinder().get()));
     HANDLE_ASTATUS(ret) << "ping failed";
+#endif
     return {};
 }
 

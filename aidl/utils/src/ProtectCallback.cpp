@@ -57,7 +57,8 @@ void DeathMonitor::remove(IProtectedCallback* killable) const {
     mObjects.erase(removedIter);
 }
 
-nn::GeneralResult<DeathHandler> DeathHandler::create(std::shared_ptr<ndk::ICInterface> object) {
+nn::GeneralResult<DeathHandler> DeathHandler::create(std::shared_ptr<ndk::ICInterface> /*object*/) {
+#if !defined(NNAPI_CHROMEOS)
     if (object == nullptr) {
         return NN_ERROR(nn::ErrorStatus::INVALID_ARGUMENT)
                << "utils::DeathHandler::create must have non-null object";
@@ -74,8 +75,11 @@ nn::GeneralResult<DeathHandler> DeathHandler::create(std::shared_ptr<ndk::ICInte
                 object->asBinder().get(), deathRecipient.get(), deathMonitor.get()));
         HANDLE_ASTATUS(ret) << "AIBinder_linkToDeath failed";
     }
-
     return DeathHandler(std::move(object), std::move(deathRecipient), std::move(deathMonitor));
+#else
+    return NN_ERROR(nn::ErrorStatus::INVALID_ARGUMENT)
+               << "DeathHandler::create not supported";
+#endif
 }
 
 DeathHandler::DeathHandler(std::shared_ptr<ndk::ICInterface> object,
@@ -90,6 +94,7 @@ DeathHandler::DeathHandler(std::shared_ptr<ndk::ICInterface> object,
 }
 
 DeathHandler::~DeathHandler() {
+#if !defined(NNAPI_CHROMEOS)
     if (kObject != nullptr && kDeathRecipient.get() != nullptr && kDeathMonitor != nullptr) {
         const auto ret = ndk::ScopedAStatus::fromStatus(AIBinder_unlinkToDeath(
                 kObject->asBinder().get(), kDeathRecipient.get(), kDeathMonitor.get()));
@@ -98,6 +103,7 @@ DeathHandler::~DeathHandler() {
             LOG(ERROR) << maybeSuccess.error().message;
         }
     }
+#endif
 }
 
 [[nodiscard]] ::android::base::ScopeGuard<DeathHandler::Cleanup> DeathHandler::protectCallback(

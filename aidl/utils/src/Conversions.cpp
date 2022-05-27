@@ -1065,10 +1065,10 @@ nn::GeneralResult<ndk::ScopedFileDescriptor> unvalidatedConvert(const nn::Shared
 
 nn::GeneralResult<Capabilities> unvalidatedConvert(const nn::Capabilities& capabilities) {
     return Capabilities{
-            .relaxedFloat32toFloat16PerformanceTensor = NN_TRY(
-                    unvalidatedConvert(capabilities.relaxedFloat32toFloat16PerformanceTensor)),
             .relaxedFloat32toFloat16PerformanceScalar = NN_TRY(
                     unvalidatedConvert(capabilities.relaxedFloat32toFloat16PerformanceScalar)),
+            .relaxedFloat32toFloat16PerformanceTensor = NN_TRY(
+                    unvalidatedConvert(capabilities.relaxedFloat32toFloat16PerformanceTensor)),
             .operandPerformance = NN_TRY(unvalidatedConvert(capabilities.operandPerformance)),
             .ifPerformance = NN_TRY(unvalidatedConvert(capabilities.ifPerformance)),
             .whilePerformance = NN_TRY(unvalidatedConvert(capabilities.whilePerformance)),
