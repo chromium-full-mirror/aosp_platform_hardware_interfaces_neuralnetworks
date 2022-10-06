@@ -37,6 +37,10 @@
 #include <TestHarness.h>
 #include <nnapi/SharedMemory.h>
 
+
+//TODO(jmpollock) Need to uprev gtest to get the correct implemenation of this.
+#define GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(T)
+
 namespace aidl::android::hardware::neuralnetworks {
 
 namespace nn = ::android::nn;

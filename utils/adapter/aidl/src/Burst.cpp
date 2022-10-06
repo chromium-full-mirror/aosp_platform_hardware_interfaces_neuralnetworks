@@ -120,7 +120,7 @@ nn::ExecutionResult<ExecutionResult> executeSynchronously(
         const auto& [message, code, outputShapes] = result.error();
         return ExecutionResult{.outputSufficientSize = false,
                                .outputShapes = utils::convert(outputShapes).value(),
-                               .timing = {.timeInDriverNs = -1, .timeOnDeviceNs = -1}};
+                               .timing = {.timeOnDeviceNs = -1, .timeInDriverNs = -1}};
     }
 
     const auto& [outputShapes, timing] = NN_TRY(result);
