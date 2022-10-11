@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #define LOG_TAG "neuralnetworks_aidl_hal_test"
 
 #include "VtsHalNeuralnetworks.h"
 
 #include <android-base/logging.h>
+#include <android-base/strings.h>
 #include <android/binder_auto_utils.h>
 #include <android/binder_interface_utils.h>
 #include <android/binder_manager.h>
@@ -39,8 +41,15 @@
 #include <aidl/Vintf.h>
 #else  // __ANDROID__
 #include <CanonicalDevice.h>
+#include <driver_loader.h>
 #include <nnapi/hal/aidl/Adapter.h>
 #endif  // __ANDROID__
+
+namespace android {
+namespace nn {
+std::vector<SharedDevice> getDevices();
+}
+}
 
 namespace aidl::android::hardware::neuralnetworks::vts::functional {
 
@@ -136,11 +145,16 @@ static std::vector<NamedDevice> getNamedDevicesImpl() {
     return namedDevices;
 }
 #else   // __ANDROID__
+static NamedDevice makeNamedDevice(const ::android::nn::SharedDevice device) {
+    return {device->getName(), adapter::adapt(device)};
+}
+
 static std::vector<NamedDevice> getNamedDevicesImpl() {
-    const std::string name = "nnapi-sample";
-    auto device = std::make_shared<const ::android::nn::sample::Device>(name);
-    auto aidlDevice = adapter::adapt(device);
-    return {{name, aidlDevice}};
+    auto devices = ::android::nn::getDevices();
+    std::vector<NamedDevice> namedDevices;
+    namedDevices.reserve(devices.size());
+    std::transform(devices.begin(), devices.end(), std::back_inserter(namedDevices), makeNamedDevice);
+    return namedDevices;
 }
 #endif  // __ANDROID__
 
