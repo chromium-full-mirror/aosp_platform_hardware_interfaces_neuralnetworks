@@ -824,6 +824,7 @@ static void mutateOperand(Operand* operand, OperandType type) {
             for (size_t i = 0; i < channelQuant.scales.size(); ++i) {
                 channelQuant.scales[i] = 1.0f;
             }
+            newOperand.extraParams.emplace(::aidl::android::hardware::neuralnetworks::OperandExtraParams {});
             newOperand.extraParams->set<OperandExtraParams::Tag::channelQuant>(
                     std::move(channelQuant));
         } break;
