@@ -39,7 +39,9 @@
 
 
 //TODO(jmpollock) Need to uprev gtest to get the correct implemenation of this.
+#ifndef GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST
 #define GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(T)
+#endif
 
 namespace aidl::android::hardware::neuralnetworks {
 
